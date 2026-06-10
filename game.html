@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>灏忛奔鍒板娓?- 璇曠帺椤?/title>
+  <title>小鱼到处游 - 试玩页</title>
   <style>
     :root {
       --bg: #041520;
@@ -38,31 +38,31 @@
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="badge">灏忛奔鍒板娓?路 璇曠帺妯″紡</div>
-      <div class="badge">鏂瑰悜閿Щ鍔?路 绌烘牸鏆傚仠</div>
+      <div class="badge">小鱼到处游 · 试玩模式</div>
+      <div class="badge">方向键移动 · 空格暂停</div>
     </div>
     <div class="grid">
       <section class="stage">
         <canvas id="game" width="1200" height="820"></canvas>
         <div class="overlay show" id="overlay">
           <div class="overlay-card">
-            <h2 style="margin:0 0 10px;">鍑嗗濂藉嚭鍙戜簡鍚楋紵</h2>
-            <p style="margin:0 0 16px; color: var(--muted);">甯姪灏忛奔鏀堕泦鏄熸槦锛岄伩寮€娴疯崏銆傜偣鍑诲紑濮嬪氨鑳芥父璧锋潵銆?/p>
-            <button class="btn" id="startGameBtn">寮€濮嬭瘯鐜?/button>
+            <h2 style="margin:0 0 10px;">准备好出发了吗？</h2>
+            <p style="margin:0 0 16px; color: var(--muted);">帮助小鱼收集星星，避开海草。点击开始就能游起来。</p>
+            <button class="btn" id="startGameBtn">开始试玩</button>
           </div>
         </div>
       </section>
       <aside class="panel">
-        <h1>娓告垙璇存槑</h1>
+        <h1>游戏说明</h1>
         <div class="score"><span id="score">0</span></div>
-        <p>鐩爣锛氭敹闆嗘洿澶氭槦鏄燂紝灏介噺涓嶈纰板埌娴疯崏銆?/p>
+        <p>目标：收集更多星星，尽量不要碰到海草。</p>
         <ul>
-          <li>鏂瑰悜閿?/ WASD 绉诲姩</li>
-          <li>绌烘牸閿殏鍋?/li>
-          <li>闈犺繎鏄熸槦鍗冲彲寰楀垎</li>
+          <li>方向键 / WASD 移动</li>
+          <li>空格键暂停</li>
+          <li>靠近星星即可得分</li>
         </ul>
-        <div class="hint" id="stateText">绛夊緟寮€濮?..</div>
-        <button class="btn" id="restartBtn">閲嶆柊寮€濮?/button>
+        <div class="hint" id="stateText">等待开始...</div>
+        <button class="btn" id="restartBtn">重新开始</button>
       </aside>
     </div>
   </div>
@@ -90,7 +90,7 @@
       fish.x = 180; fish.y = 410; fish.vx = 0; fish.vy = 0;
       stars = Array.from({ length: 6 }, () => spawnStar());
       weeds = Array.from({ length: 5 }, () => spawnWeed());
-      stateText.textContent = '寮€濮嬫敹闆嗘槦鏄熷惂锛?';
+      stateText.textContent = '开始收集星星吧！';
     }
     function spawnStar() { return { x: 420 + Math.random() * 700, y: 80 + Math.random() * 640, r: 14 }; }
     function spawnWeed() { return { x: 360 + Math.random() * 760, y: 100 + Math.random() * 620, w: 30 + Math.random() * 24, h: 90 + Math.random() * 70 }; }
@@ -176,7 +176,7 @@
           score += 10;
           scoreEl.textContent = score;
           Object.assign(s, spawnStar());
-          stateText.textContent = '鏀堕泦鎴愬姛锛佺户缁墠杩涖€?';
+          stateText.textContent = '收集成功，继续前进。';
         }
       }
       for (const w of weeds) {
@@ -185,7 +185,7 @@
           score = Math.max(0, score - 5);
           scoreEl.textContent = score;
           fish.x = 180; fish.y = 410;
-          stateText.textContent = '纰板埌娴疯崏浜嗭紝灏忓績涓€鐐癸紒';
+          stateText.textContent = '碰到海草了，小心一点！';
           break;
         }
       }
@@ -223,7 +223,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === ' ') {
         paused = !paused;
-        stateText.textContent = paused ? '宸叉殏鍋? : '缁х画鍐掗櫓';
+        stateText.textContent = paused ? '已暂停' : '继续冒险';
         return;
       }
       keys.add(e.key);
