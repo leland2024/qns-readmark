@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灏忛奔鍒板娓?- 娓告垙浠嬬粛椤?/title>
+  <style>
+    :root {
+      --bg: #061826;
+      --bg-2: #0b2a3d;
+      --card: rgba(10, 32, 50, 0.72);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text: #eaf6ff;
+      --muted: #b6d4e6;
+      --accent: #43d3ff;
+      --accent-2: #64ffa8;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(67, 211, 255, 0.18), transparent 35%),
+        radial-gradient(circle at 80% 20%, rgba(100, 255, 168, 0.13), transparent 28%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+      opacity: 0.35;
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: center;
+      min-height: 88vh;
+    }
+
+    .title-block {
+      padding: 24px 0;
+      animation: floatIn 0.8s ease both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(42px, 7vw, 76px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      max-width: 44ch;
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--muted);
+      margin: 0 0 28px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 15px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #04131e;
+      box-shadow: 0 14px 34px rgba(67, 211, 255, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 42px rgba(67, 211, 255, 0.34);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      opacity: 0.95;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .cover-card {
+      position: relative;
+      padding: 18px;
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: floatIn 0.9s ease 0.1s both;
+    }
+
+    .cover-art {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 22%, rgba(255,255,255,0.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 50% 38%, #84dfff 0 12%, transparent 13%),
+        radial-gradient(circle at 70% 58%, rgba(132, 223, 255, 0.9) 0 8%, transparent 9%),
+        radial-gradient(circle at 40% 70%, rgba(100, 255, 168, 0.75) 0 6%, transparent 7%),
+        linear-gradient(180deg, #0f5678 0%, #0a2d46 58%, #051724 100%);
+    }
+
+    .cover-art::before,
+    .cover-art::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      filter: blur(2px);
+    }
+
+    .cover-art::before {
+      width: 240px;
+      height: 240px;
+      top: -70px;
+      left: -50px;
+    }
+
+    .cover-art::after {
+      width: 180px;
+      height: 180px;
+      right: -40px;
+      bottom: -55px;
+    }
+
+    .fish {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      width: 190px;
+      height: 110px;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
+      animation: swim 4s ease-in-out infinite;
+    }
+
+    .fish-body {
+      position: absolute;
+      inset: 18px 30px 18px 38px;
+      border-radius: 60% 58% 55% 52%;
+      background: linear-gradient(135deg, #ffb54a, #ff7d5b 55%, #ff5a7a);
+      box-shadow: inset -18px -14px 0 rgba(255,255,255,0.13);
+    }
+
+    .fish-tail {
+      position: absolute;
+      left: 0;
+      top: 32px;
+      width: 58px;
+      height: 46px;
+      background: linear-gradient(135deg, #ff8f5b, #ff5b84);
+      clip-path: polygon(0 50%, 100% 0, 84% 50%, 100% 100%);
+      transform-origin: right center;
+      animation: tail 0.7s ease-in-out infinite alternate;
+    }
+
+    .fish-eye {
+      position: absolute;
+      right: 48px;
+      top: 37px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #07131c;
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.16);
+    }
+
+    .water-rings span {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(132, 223, 255, 0.26);
+      animation: ripple 4.5s linear infinite;
+    }
+
+    .water-rings span:nth-child(1) { width: 120px; height: 120px; left: 20px; top: 56px; animation-delay: 0s; }
+    .water-rings span:nth-child(2) { width: 170px; height: 170px; left: 110px; top: 170px; animation-delay: 1s; }
+    .water-rings span:nth-child(3) { width: 90px; height: 90px; right: 30px; bottom: 40px; animation-delay: 2s; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: 22px;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .card p, .card li {
+      color: var(--muted);
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .start-panel {
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 22px;
+      border: 1px solid rgba(100, 255, 168, 0.22);
+      background: linear-gradient(135deg, rgba(67, 211, 255, 0.11), rgba(100, 255, 168, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%) translateY(16px);
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(6, 24, 38, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes swim {
+      0%, 100% { transform: translate(-50%, -50%) translateX(0) rotate(-2deg); }
+      50% { transform: translate(-50%, -50%) translateX(18px) rotate(2deg); }
+    }
+
+    @keyframes tail {
+      from { transform: rotate(-18deg); }
+      to { transform: rotate(16deg); }
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.75); opacity: 0; }
+      30% { opacity: 0.7; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding-top: 18px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .start-panel {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100% - 20px, 1100px);
+        padding-top: 20px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .cover-card, .card, .start-panel {
+        border-radius: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="title-block">
+        <div class="eyebrow">Arcade Adventure</div>
+        <h1>灏忛奔鍒板娓?/h1>
+        <p class="subtitle">
+          杩欐槸涓€娆捐交鏉炬不鎰堢殑浼戦棽娓告垙銆備綘灏嗘帶鍒朵竴鍙皬楸煎湪娴峰簳涓栫晫閲岀┛姊€佽翰閬块殰纰嶃€佹敹闆嗘槦鏄燂紝
+          涓€璺帰绱㈡洿娣卞鐨勭绉樻捣鍩熴€?
+        </p>
+        <div class="actions">
+          <button class="btn btn-primary" id="startBtn">寮€濮嬭瘯鐜?/button>
+          <div class="hint" id="statusText">鍑嗗濂藉拰灏忛奔涓€璧峰嚭鍙戜簡鍚楋紵</div>
+        </div>
+      </div>
+
+      <div class="cover-card">
+        <div class="cover-art" aria-label="娓告垙灏侀潰">
+          <div class="water-rings">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="fish" aria-hidden="true">
+            <div class="fish-tail"></div>
+            <div class="fish-body"></div>
+            <div class="fish-eye"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-grid" aria-label="娓告垙淇℃伅">
+      <article class="card">
+        <h2>娓告垙绠€浠?/h2>
+        <p>
+          銆婂皬楸煎埌澶勬父銆嬫槸涓€娆剧敾椋庢竻鏂般€佹搷浣滅畝鍗曠殑娴峰簳鍐掗櫓灏忔父鎴忋€?
+          鐜╁闇€瑕佸府鍔╁皬楸煎湪鍙樺寲澶氱鐨勬捣娲嬩腑鑷敱绌胯锛屾劅鍙楁帰绱㈠拰鏀堕泦鐨勪箰瓒ｃ€?
+        </p>
+      </article>
+
+      <article class="card">
+        <h2>鐜╂硶璇存槑</h2>
+        <ul>
+          <li>浣跨敤鏂瑰悜閿垨瑙︽懜鎷栧姩鎺у埗灏忛奔绉诲姩銆?</li>
+          <li>韬查伩娴疯崏銆佺鐭冲拰鍏朵粬鍗遍櫓闅滅銆?</li>
+          <li>灏藉彲鑳芥敹闆嗛噾甯併€佽礉澹冲拰鍙戝厜鏄熸槦銆?</li>
+          <li>鍧氭寔鏇翠箙锛岃В閿佹洿娣辨捣鍩熶笌鏂板満鏅€?</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>娓告垙鐗硅壊</h2>
+        <p>
+          鑺傚杞诲揩銆佺晫闈㈢畝娲併€侀€傚悎闅忔椂鎵撳紑鐜╀竴灞€銆?
+          鏃犺浣犳兂鏀炬澗涓€涓嬶紝杩樻槸鎯虫寫鎴樿嚜宸辩殑鍙嶅簲鍔涳紝杩欓噷閮藉緢鍚堥€傘€?
+        </p>
+      </article>
+    </section>
+
+    <section class="start-panel" aria-label="寮€濮嬭瘯鐜╁尯鍩?">
+      <div>
+        <h2 style="margin: 0 0 8px;">鐜板湪灏卞嚭鍙?/h2>
+        <p style="margin: 0; color: var(--muted); line-height: 1.7;">
+          鐐瑰嚮鎸夐挳锛岃繘鍏ュ皬楸肩殑娴峰簳涓栫晫锛屽紑濮嬩綘鐨勭涓€灞€璇曠帺銆?
+        </p>
+      </div>
+      <button class="btn btn-primary" id="startBtnBottom">寮€濮嬭瘯鐜?/button>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">宸插紑濮嬭瘯鐜╋紝姝ｅ湪杩涘叆娓告垙椤?..</div>
+
+  <script>
+    const startButtons = [
+      document.getElementById("startBtn"),
+      document.getElementById("startBtnBottom")
+    ];
+    const statusText = document.getElementById("statusText");
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    startButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        statusText.textContent = "璇曠帺椤靛凡鍑嗗濂斤紝椹笂鍑哄彂锛?";
+        showToast("宸插紑濮嬭瘯鐜╋紝姝ｅ湪杩涘叆娓告垙椤?..");
+        setTimeout(() => {
+          window.location.href = "./game.html";
+        }, 700);
+      });
+    });
+  </script>
+</body>
+</html>
