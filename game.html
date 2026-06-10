@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灏忛奔鍒板娓?- 璇曠帺椤?/title>
+  <style>
+    :root {
+      --bg: #041520;
+      --panel: rgba(8, 28, 44, 0.82);
+      --line: rgba(255,255,255,0.12);
+      --text: #eef8ff;
+      --muted: #afcada;
+      --accent: #49d8ff;
+      --accent-2: #79ffb8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: radial-gradient(circle at top, #0f3955, var(--bg)); color: var(--text); }
+    .wrap { width: min(1100px, calc(100% - 24px)); margin: 0 auto; padding: 20px 0 28px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .badge { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,0.05); color: var(--muted); font-size: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+    .stage, .panel { border: 1px solid var(--line); background: var(--panel); border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
+    .stage { position: relative; min-height: calc(100vh - 112px); overflow: hidden; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .panel { padding: 18px; }
+    .panel h1 { margin: 0 0 10px; font-size: 28px; }
+    .panel p, .panel li { color: var(--muted); line-height: 1.7; }
+    .score { font-size: 42px; font-weight: 800; color: var(--accent-2); margin: 4px 0 16px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; border: 0; border-radius: 14px; padding: 14px 16px; font-size: 16px; font-weight: 700; cursor: pointer; color: #04131e; background: linear-gradient(135deg, var(--accent), var(--accent-2)); margin-top: 14px; }
+    .hint { margin-top: 12px; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); }
+    .overlay { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: radial-gradient(circle at center, rgba(0,0,0,0.12), rgba(0,0,0,0.42)); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .overlay.show { opacity: 1; pointer-events: auto; }
+    .overlay-card { width: min(420px, calc(100% - 28px)); padding: 24px; border-radius: 22px; background: rgba(6,24,38,0.92); border: 1px solid var(--line); }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .stage { min-height: 62vh; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="badge">灏忛奔鍒板娓?路 璇曠帺妯″紡</div>
+      <div class="badge">鏂瑰悜閿Щ鍔?路 绌烘牸鏆傚仠</div>
+    </div>
+    <div class="grid">
+      <section class="stage">
+        <canvas id="game" width="1200" height="820"></canvas>
+        <div class="overlay show" id="overlay">
+          <div class="overlay-card">
+            <h2 style="margin:0 0 10px;">鍑嗗濂藉嚭鍙戜簡鍚楋紵</h2>
+            <p style="margin:0 0 16px; color: var(--muted);">甯姪灏忛奔鏀堕泦鏄熸槦锛岄伩寮€娴疯崏銆傜偣鍑诲紑濮嬪氨鑳芥父璧锋潵銆?/p>
+            <button class="btn" id="startGameBtn">寮€濮嬭瘯鐜?/button>
+          </div>
+        </div>
+      </section>
+      <aside class="panel">
+        <h1>娓告垙璇存槑</h1>
+        <div class="score"><span id="score">0</span></div>
+        <p>鐩爣锛氭敹闆嗘洿澶氭槦鏄燂紝灏介噺涓嶈纰板埌娴疯崏銆?/p>
+        <ul>
+          <li>鏂瑰悜閿?/ WASD 绉诲姩</li>
+          <li>绌烘牸閿殏鍋?/li>
+          <li>闈犺繎鏄熸槦鍗冲彲寰楀垎</li>
+        </ul>
+        <div class="hint" id="stateText">绛夊緟寮€濮?..</div>
+        <button class="btn" id="restartBtn">閲嶆柊寮€濮?/button>
+      </aside>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const stateText = document.getElementById('stateText');
+    const overlay = document.getElementById('overlay');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const keys = new Set();
+    let running = false;
+    let paused = false;
+    let score = 0;
+    let last = 0;
+    const fish = { x: 180, y: 410, vx: 0, vy: 0, r: 26 };
+    let stars = [];
+    let weeds = [];
+
+    function reset() {
+      score = 0;
+      scoreEl.textContent = score;
+      fish.x = 180; fish.y = 410; fish.vx = 0; fish.vy = 0;
+      stars = Array.from({ length: 6 }, () => spawnStar());
+      weeds = Array.from({ length: 5 }, () => spawnWeed());
+      stateText.textContent = '寮€濮嬫敹闆嗘槦鏄熷惂锛?';
+    }
+    function spawnStar() { return { x: 420 + Math.random() * 700, y: 80 + Math.random() * 640, r: 14 }; }
+    function spawnWeed() { return { x: 360 + Math.random() * 760, y: 100 + Math.random() * 620, w: 30 + Math.random() * 24, h: 90 + Math.random() * 70 }; }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    function drawBackground(t) {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#0d4c6d');
+      g.addColorStop(1, '#051623');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      for (let i = 0; i < 18; i++) {
+        const x = (i * 90 + (t * 0.03)) % (canvas.width + 120) - 60;
+        const y = 40 + (i % 6) * 110;
+        ctx.beginPath();
+        ctx.arc(x, y, 2 + (i % 3), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    function drawFish() {
+      ctx.save();
+      ctx.translate(fish.x, fish.y);
+      const ang = Math.atan2(fish.vy, fish.vx || 1);
+      ctx.rotate(ang * 0.25);
+      ctx.scale(fish.vx < 0 ? -1 : 1, 1);
+      ctx.fillStyle = '#ff8a4c';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 34, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ff5e7c';
+      ctx.beginPath();
+      ctx.ellipse(6, 0, 24, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffb65d';
+      ctx.beginPath();
+      ctx.moveTo(-32, 0);
+      ctx.lineTo(-58, -22);
+      ctx.lineTo(-52, 0);
+      ctx.lineTo(-58, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#051724';
+      ctx.beginPath();
+      ctx.arc(14, -6, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    function drawStar(s) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.fillStyle = '#fff08a';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + i * (Math.PI * 2 / 5);
+        ctx.lineTo(Math.cos(a) * s.r, Math.sin(a) * s.r);
+        const b = a + Math.PI / 5;
+        ctx.lineTo(Math.cos(b) * s.r * 0.45, Math.sin(b) * s.r * 0.45);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    function drawWeed(w) {
+      ctx.fillStyle = '#1dd182';
+      ctx.beginPath();
+      ctx.roundRect(w.x, w.y, w.w, w.h, 12);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(w.x + 8, w.y + 8, 4, w.h - 16);
+    }
+    function update(dt) {
+      const speed = 320;
+      fish.vx = 0; fish.vy = 0;
+      if (keys.has('ArrowLeft') || keys.has('a')) fish.vx -= speed;
+      if (keys.has('ArrowRight') || keys.has('d')) fish.vx += speed;
+      if (keys.has('ArrowUp') || keys.has('w')) fish.vy -= speed;
+      if (keys.has('ArrowDown') || keys.has('s')) fish.vy += speed;
+      fish.x = clamp(fish.x + fish.vx * dt, fish.r, canvas.width - fish.r);
+      fish.y = clamp(fish.y + fish.vy * dt, fish.r, canvas.height - fish.r);
+      for (const s of stars) {
+        if (Math.hypot(fish.x - s.x, fish.y - s.y) < fish.r + s.r) {
+          score += 10;
+          scoreEl.textContent = score;
+          Object.assign(s, spawnStar());
+          stateText.textContent = '鏀堕泦鎴愬姛锛佺户缁墠杩涖€?';
+        }
+      }
+      for (const w of weeds) {
+        const hit = fish.x > w.x && fish.x < w.x + w.w && fish.y > w.y && fish.y < w.y + w.h;
+        if (hit) {
+          score = Math.max(0, score - 5);
+          scoreEl.textContent = score;
+          fish.x = 180; fish.y = 410;
+          stateText.textContent = '纰板埌娴疯崏浜嗭紝灏忓績涓€鐐癸紒';
+          break;
+        }
+      }
+    }
+    function loop(ts) {
+      if (!running) return;
+      if (!last) last = ts;
+      const dt = Math.min(0.033, (ts - last) / 1000);
+      last = ts;
+      if (!paused) update(dt);
+      drawBackground(ts);
+      weeds.forEach(drawWeed);
+      stars.forEach(drawStar);
+      drawFish();
+      requestAnimationFrame(loop);
+    }
+    startGameBtn.addEventListener('click', () => {
+      overlay.classList.remove('show');
+      if (!running) {
+        running = true;
+        reset();
+        requestAnimationFrame(loop);
+      }
+      paused = false;
+    });
+    restartBtn.addEventListener('click', () => {
+      reset();
+      paused = false;
+      overlay.classList.remove('show');
+      if (!running) {
+        running = true;
+        requestAnimationFrame(loop);
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === ' ') {
+        paused = !paused;
+        stateText.textContent = paused ? '宸叉殏鍋? : '缁х画鍐掗櫓';
+        return;
+      }
+      keys.add(e.key);
+    });
+    window.addEventListener('keyup', (e) => keys.delete(e.key));
+    reset();
+    drawBackground(0);
+    requestAnimationFrame(() => {
+      drawFish();
+      weeds.forEach(drawWeed);
+      stars.forEach(drawStar);
+    });
+  </script>
+</body>
+</html>
